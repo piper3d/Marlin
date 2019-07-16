@@ -252,7 +252,12 @@ void GcodeSuite::G28(const bool always_home_all) {
 
   #else // NOT DELTA
 
-    const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), homeZ = parser.seen('Z'),
+ #if ENABLED(INFINITEZ)
+	const bool homeZ = false;
+  #else
+	const bool homeZ = parser.seen('Z');
+  #endif
+    const bool homeX = parser.seen('X'), homeY = parser.seen('Y'), 
                home_all = always_home_all || (homeX == homeY && homeX == homeZ),
                doX = home_all || homeX, doY = home_all || homeY, doZ = home_all || homeZ;
 
@@ -263,7 +268,13 @@ void GcodeSuite::G28(const bool always_home_all) {
       if (doZ) homeaxis(Z_AXIS);
 
     #endif
-
+    const float y_homing_dist=(
+	#if ENABLED(INFINITEZ)
+		Y_HOMING_DIST
+	#else
+		0
+	#endif
+	);  
     const float z_homing_height = (
       #if ENABLED(UNKNOWN_Z_NO_RAISE)
         !TEST(axis_known_position, Z_AXIS) ? 0 :
@@ -279,8 +290,12 @@ void GcodeSuite::G28(const bool always_home_all) {
         do_blocking_move_to_z(destination[Z_AXIS]);
       }
     }
-
-    #if ENABLED(QUICK_HOME)
+  	  // Move Y before homing X
+    if(y_homing_dist>current_position[Y_AXIS] && doX)
+	{
+		do_blocking_move_to_xy(0,y_homing_dist-current_position[Y_AXIS]);
+	}
+  #if ENABLED(QUICK_HOME)
 
       if (doX && doY) quick_home_xy();
 
