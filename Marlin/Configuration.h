@@ -586,6 +586,8 @@
 //#define COREZX
 //#define COREZY
 
+// For infiniteZ 3d printers uncomment next line
+//#define INFINITEZ
 //===========================================================================
 //============================== Endstop Settings ===========================
 //===========================================================================
@@ -1019,9 +1021,13 @@
 
 //#define UNKNOWN_Z_NO_RAISE // Don't raise Z (lower the bed) if Z is "unknown." For beds that fall when Z is powered off.
 
+#ifdef INFINITEZ
+    #define Z_HOMING_HEIGHT 0  // Do not move Z- belt before homing X and Y
+    #define Y_HOMING_DIST 5    // (mm) Minimal Y distance before homing (G28) for head clearance above the belt
+#else
 //#define Z_HOMING_HEIGHT 4  // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                              // Be sure you have this distance over your Z_MAX_POS in case.
-
+#endif
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
 #define X_HOME_DIR -1
